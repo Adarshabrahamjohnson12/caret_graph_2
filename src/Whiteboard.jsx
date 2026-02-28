@@ -491,6 +491,7 @@
 
 
 
+
 import { useState, useRef, useEffect, useCallback } from "react";
 
 /* ─── GOOGLE SHEETS CONFIG ───────────────────────────────────── */
@@ -1198,6 +1199,44 @@ export default function Whiteboard() {
               {features.contactVeto ? " ⚠ FINGER" : ""}
             </span>
           )}
+          {/* Report Button */}
+          <a
+            href="https://docs.google.com/spreadsheets/d/1FlnJ4tRbPGyDmXA0P9-GQYqqqu8dp8rWskZNpJV93hg/edit?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display:"flex", alignItems:"center", gap:6,
+              background:"linear-gradient(135deg, #0d2a18 0%, #0a1f12 100%)",
+              border:"1px solid #22c55e66",
+              borderRadius:10, padding:"7px 14px",
+              textDecoration:"none", cursor:"pointer",
+              boxShadow:"0 0 16px rgba(34,197,94,0.15), inset 0 0 0 1px rgba(34,197,94,0.08)",
+              transition:"all .2s",
+            }}
+            onMouseEnter={e => e.currentTarget.style.boxShadow="0 0 24px rgba(34,197,94,0.35), inset 0 0 0 1px rgba(34,197,94,0.2)"}
+            onMouseLeave={e => e.currentTarget.style.boxShadow="0 0 16px rgba(34,197,94,0.15), inset 0 0 0 1px rgba(34,197,94,0.08)"}
+          >
+            <div style={{
+              width:18, height:18, borderRadius:4,
+              background:"rgba(34,197,94,0.15)",
+              border:"1px solid #22c55e44",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              flexShrink:0,
+            }}>
+              <span style={{ fontSize:10, lineHeight:1 }}>📊</span>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:1 }}>
+              <span style={{ fontSize:10, fontWeight:800, color:"#22c55e", letterSpacing:".14em", textTransform:"uppercase", lineHeight:1 }}>REPORT</span>
+              <span style={{ fontSize:7, fontWeight:600, color:"#22c55e55", letterSpacing:".06em", lineHeight:1 }}>VIEW SHEET</span>
+            </div>
+            <div style={{
+              width:5, height:5, borderRadius:"50%",
+              background:"#22c55e",
+              boxShadow:"0 0 6px #22c55e",
+              animation:"pulse 2s infinite",
+              marginLeft:2,
+            }}/>
+          </a>
         </div>
 
       </div>
