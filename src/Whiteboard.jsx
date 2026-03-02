@@ -492,24 +492,17 @@ export default function Whiteboard() {
   };
 
   const startPressureLoop = () => {
-    if (rafId.current) cancelAnimationFrame(rafId.current);
-    const loop = () => {
+    if (rafId.current) clearInterval(rafId.current);
+    rafId.current = setInterval(() => {
       if (!drawing.current) return;
-      // Stronger EMA — 0.92 weight on previous = much smoother
-      smoothedPressure.current = smoothedPressure.current * 0.92 + livePressure.current * 0.08;
-      // Deadband — only push if changed by more than 0.5%, kills micro-jitter
-      const prev = pressureHistoryRef.current;
-      if (Math.abs(smoothedPressure.current - prev) > 0.005) {
-        pressureHistoryRef.current = smoothedPressure.current;
-        pushPressure(smoothedPressure.current, liveArea.current);
-      }
-      rafId.current = requestAnimationFrame(loop);
-    };
-    rafId.current = requestAnimationFrame(loop);
+      // Very strong EMA at 10fps — silky smooth
+      smoothedPressure.current = smoothedPressure.current * 0.85 + livePressure.current * 0.15;
+      pushPressure(smoothedPressure.current, liveArea.current);
+    }, 100); // 10fps — smooth stable line
   };
 
   const stopPressureLoop = () => {
-    if (rafId.current) { cancelAnimationFrame(rafId.current); rafId.current = null; }
+    if (rafId.current) { clearInterval(rafId.current); rafId.current = null; }
   };
 
   const onPointerDown = (e) => {
@@ -553,18 +546,22 @@ export default function Whiteboard() {
   const onPointerMove = (e) => {
     e.preventDefault();
     if (!drawing.current) return;
-    const pos = getPos(e), pres = getPressure(e);
-    livePressure.current = pres;
+    const pos  = getPos(e);
+    const pres = getPressure(e);
+    // Smooth AT SOURCE — don't let raw jitter into livePressure
+    livePressure.current = livePressure.current * 0.80 + pres * 0.20;
+    // Quantize to nearest 0.5% — kills micro-jitter completely
+    livePressure.current = Math.round(livePressure.current * 200) / 200;
     liveArea.current     = getArea(e);
     const c = ctx();
     if (!c) return;
-    const avgPres = (lastPres.current + pres) / 2;
+    const avgPres = (lastPres.current + livePressure.current) / 2;
     applyStyle(c, avgPres);
     const mid = { x:(lastPt.current.x+pos.x)/2, y:(lastPt.current.y+pos.y)/2 };
     c.beginPath(); c.moveTo(lastPt.current.x, lastPt.current.y);
     c.quadraticCurveTo(lastPt.current.x, lastPt.current.y, mid.x, mid.y);
     c.stroke();
-    lastPt.current = mid; lastPres.current = pres;
+    lastPt.current = mid; lastPres.current = livePressure.current;
   };
 
   const onPointerUp = async () => {
